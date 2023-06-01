@@ -1,0 +1,144 @@
+---
+title: "TAREA 2"
+author: "Amy Fonseca González"
+format: html
+editor: visual
+---
+
+## INTRODUCCIÓN:
+
+A continuación se presentarán distintos gráficos en donde se demostrarán varios formas de demostrar los contenidos del Coffee Quality Institude (CQI). Esta Institución se encarga de mejorar la calidad del café, trayendo consigo un interés por mejorar tambien su valor. CQI desarrolla sus acciones por medio de dinámicas, como algunos programas enfocados en las investigaciones de las variantes del café.
+
+La institución además ofrece distintas acividades como la certificación de productos y algunas capacitaciones para conocer más acerca del café.Así mismo, el CQI para desarrollar sus objetivos emplea la utilización de herramientas como procesadores, tostadores, esto para mejorar, y promover los estándares de calidad del producto.
+
+En lo que se enfoca esta institución es en:
+
+-   Aroma
+
+-   Sabor
+
+-   Acidez
+
+-   Equilibrio, entre otros..
+
+Referencia: Información obtenida en Github, repositorio de [Fatih Boyar](https://github.com/fatih-boyar/coffee-quality-data-CQI)
+
+## CARGA DE PAQUETES
+
+```{r}
+#| label: carga-paquetes
+#| warning: false
+#| code-fold: true
+
+library(tidyverse)
+library(plotly)
+library(DT)
+library(readr)
+library(ggplot2)
+library(gapminder)
+library(ggthemes)
+library(hrbrthemes)
+```
+
+## TABLA DE DATOS
+
+```{r}
+#| label: tabla-datos
+#| warning: false
+#| code-fold: true
+#| message: false
+
+tabla <- "https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2023-i/main/datos/cqi/coffee-quality.csv"
+data <- read.csv(tabla)
+
+
+datatable(data[, c(
+  "Country_of_Origin", 
+  "Variety", 
+  "Color", 
+  "Altitude", 
+  "Total_Cup_Points")],
+  options = list(pageLength = 10, lengthMenu = c(10, 20, 50)),
+  rownames = FALSE)
+
+```
+
+## GRÁFICOS
+
+### HISTROGRAMA
+
+```{r}
+#| label: gráficos-estadísticos-histograma
+#| warning: false
+#| code-fold: true
+#| message: false
+
+histograma <-
+ggplot(data, aes(x = Total_Cup_Points)) +
+  geom_histogram(
+    aes(
+      text = paste0(
+        "Distribución", round(after_stat(x), 2), "\n",
+        "Frecuencia: ", after_stat(count)
+      ),
+      y = after_stat(density) 
+    ),
+    bins = 10
+  ) +
+  geom_density() +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(x = "Total", y = "Frecuencia", 
+       title = "Distribución de Total") +
+  theme_solarized()
+
+ggplotly(histograma, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+### GRÁFICO DISPERSIÓN
+
+```{r}
+#| label: gráfico-dispersión
+#| warning: false
+#| code-fold: true
+#| message: false
+
+dispersion <-
+  ggplot(data, aes(x = Altitude, y = Total_Cup_Points)) +
+  geom_point(aes(
+    text = paste0(
+      "País: ", Country_of_Origin, "\n",
+      "Altitud:", round(Altitude, 2), "\n",
+      "Puntaje Total:", round(Total_Cup_Points, 2), "\n"
+    )
+  )) +
+  geom_smooth(method = "lm") +
+  ggtitle("Altitud vs Total") +
+  xlab("Altitud") +
+  ylab("Puntaje Total") +
+  theme_economist()  
+
+ggplotly(dispersion, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+### GRÁFICO DE CAJA
+
+```{r}
+#| label: gráfico-caja
+#| warning: false
+#| code-fold: true
+#| message: false
+
+grafico_caja_ggplot2 <- 
+  ggplot(data, aes(x = Color, y = Total_Cup_Points)) +
+  geom_boxplot() +
+  ggtitle("Distribución del Puntaje Total cada color") +
+  xlab("Color") +
+  ylab("Puntaje Total") +
+  theme_excel()
+
+ggplotly(grafico_caja_ggplot2) |> 
+  config(locale = 'es')
+```
+
